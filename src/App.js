@@ -1,21 +1,35 @@
 import TodosActions from "./components/Todos/TodosActions";
 import { v4 as uuidv4 } from 'uuid';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import TodoList from "./components/Todos/TodoList";
 import TodoForm from "./components/Todos/TodoForm";
 import './App.css';
 function App() {
     const [todos,setTodos] = useState([])
-    const addTodoHandler = (text) =>{
+    const addTodoHandler = async (text) =>{
         const newTodo ={
             text,
             isCompleted: false,
             id: uuidv4()
         }
-        setTodos([...todos,newTodo])
+        await setTodos([...todos,newTodo])
+        const itemsString = JSON.stringify([...todos,newTodo] || [])
+        localStorage.setItem('todos', itemsString)
     }
+
+    useEffect(() => {
+        const stringItems = localStorage.getItem('todos') || []
+        if (stringItems.length === 0) {
+            return null
+        }
+        const parse = JSON.parse(stringItems)
+        setTodos(parse)
+    }, [])
+
     const deleteTodoHandler = (id) =>{
-        setTodos(todos.filter((todo)=> todo.id !== id))
+        const filters = todos.filter((todo)=> todo.id !== id)
+        setTodos(filters)
+        localStorage.setItem('todos', JSON.stringify(filters))
     }
     const toggleTodoHandler = (id) =>{
         setTodos(todos.map((todo) =>
